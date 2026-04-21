@@ -1,22 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Control del brazo robotico usando control Xbox.
-
-Mapeo Xbox estandar (Windows y Linux):
-  Stick izquierdo X  -> Eje 0
-  Stick izquierdo Y  -> Eje 1
-  Stick derecho  X   -> Eje 2
-  Stick derecho  Y   -> Eje 3
-  LT (trigger)       -> Eje 4  (reposo = -1.0 en Windows, 0.0 en Linux)
-  RT (trigger)       -> Eje 5  (reposo = -1.0 en Windows, 0.0 en Linux)
-  A                  -> Boton 0
-  B                  -> Boton 1
-  X                  -> Boton 2
-  Y                  -> Boton 3
-  LB                 -> Boton 4
-  RB                 -> Boton 5
-  Cruceta            -> Hat 0  (algunos modelos la reportan como ejes 6 y 7)
-"""
 
 import math
 import pygame
@@ -47,10 +28,10 @@ pygame.joystick.init()
 
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Brazo Robotico - Control Xbox")
+pygame.display.set_caption("Brazo Robotico - Pygame")
 
 clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 28)
+font = pygame.font.SysFont(None, 30)
 
 joystick       = None
 joystick_name  = "Sin control"
@@ -58,16 +39,16 @@ joystick_name  = "Sin control"
 last_select_time = 0
 last_angle_time  = 0
 
-base    = (400, 350)
-lengths = [120, 90, 70, 50]
+base    = (400, 300)
+lengths = [100, 80, 60, 40]
 angles  = [0.0, 0.0, 0.0, 0.0]
 selected = 0
 
-box_pos  = [580, 280]
-box_size = 22
+box_pos  = [550, 250]
+box_size = 20
 grabbed  = False
 
-target_rect = pygame.Rect(80, 420, 90, 90)
+target_rect = pygame.Rect(100, 400, 80, 80)
 
 
 # ---------------------------------------------------------------------------
@@ -268,49 +249,40 @@ while running:
         box_pos[0] = int(end[0])
         box_pos[1] = int(end[1])
 
-    # ---- Dibujo ---------------------------------------------------------
-
-    # Target (zona objetivo)
-    pygame.draw.rect(screen, (0, 200, 80), target_rect, 2)
-    target_label = font.render("META", True, (0, 200, 80))
-    screen.blit(target_label, (target_rect.x + 22, target_rect.y + 30))
+    # ---- Dibujo (mismo orden que interfaz.py) ---------------------------
 
     # Brazo
     for i in range(len(points) - 1):
-        color_seg = (0, 180, 255) if i != selected else (255, 200, 0)
-        pygame.draw.line(screen, color_seg,
-                         (int(points[i][0]),   int(points[i][1])),
-                         (int(points[i+1][0]), int(points[i+1][1])), 6)
-        pygame.draw.circle(screen, (220, 60, 60),
-                           (int(points[i][0]), int(points[i][1])), 7)
+        pygame.draw.line(
+            screen,
+            (0, 150, 255),
+            (int(points[i][0]), int(points[i][1])),
+            (int(points[i + 1][0]), int(points[i + 1][1])),
+            5,
+        )
+        pygame.draw.circle(screen, (255, 0, 0), (int(points[i][0]), int(points[i][1])), 6)
 
-    # Efector final
-    pygame.draw.circle(screen, (255, 255, 0), (int(end[0]), int(end[1])), 9)
+    # Pinza
+    pygame.draw.circle(screen, (255, 255, 0), (int(end[0]), int(end[1])), 8)
 
     # Caja
-    box_color = (255, 80, 0) if grabbed else (255, 165, 0)
-    pygame.draw.rect(screen, box_color,
-                     (box_pos[0] - box_size // 2,
-                      box_pos[1] - box_size // 2,
-                      box_size, box_size))
+    pygame.draw.rect(
+        screen,
+        (255, 165, 0),
+        (box_pos[0] - box_size // 2, box_pos[1] - box_size // 2, box_size, box_size),
+    )
 
-    # Mensaje exito
-    if target_rect.collidepoint(box_pos[0], box_pos[1]):
-        msg = font.render("¡Caja colocada exitosamente!", True, (0, 255, 120))
-        screen.blit(msg, (240, 40))
+    # Zona objetivo
+    pygame.draw.rect(screen, (0, 255, 0), target_rect, 2)
 
-    # HUD
-    hud_lines = [
-        "Stick izq / cruceta: girar eslabon",
-        "LB / RB o cruceta izq/der: cambiar eslabon",
-        "Boton A: agarrar / soltar",
-        f"Eslabon activo: {selected + 1}  (segmento amarillo)",
-        f"Control: {joystick_name}",
-        f"Angulos: {[round(math.degrees(a), 1) for a in angles]}",
-    ]
-    colors = [(200, 200, 200)] * 3 + [(255, 220, 0), (100, 200, 255), (150, 150, 150)]
-    for i, (line, col) in enumerate(zip(hud_lines, colors)):
-        screen.blit(font.render(line, True, col), (10, 10 + i * 28))
+    # Verificar éxito
+    if target_rect.collidepoint(box_pos):
+        text = font.render("Caja colocada exitosamente", True, (0, 255, 0))
+        screen.blit(text, (250, 50))
+
+    # Mostrar eslabón seleccionado
+    text2 = font.render(f"Eslabon seleccionado: {selected + 1}", True, (255, 255, 255))
+    screen.blit(text2, (10, 10))
 
     pygame.display.flip()
     clock.tick(60)
