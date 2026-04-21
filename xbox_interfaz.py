@@ -1,22 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Control del brazo robotico usando control Xbox.
 
-Mapeo Xbox estandar (Windows y Linux):
-  Stick izquierdo X  -> Eje 0
-  Stick izquierdo Y  -> Eje 1
-  Stick derecho  X   -> Eje 2
-  Stick derecho  Y   -> Eje 3
-  LT (trigger)       -> Eje 4  (reposo = -1.0 en Windows, 0.0 en Linux)
-  RT (trigger)       -> Eje 5  (reposo = -1.0 en Windows, 0.0 en Linux)
-  A                  -> Boton 0
-  B                  -> Boton 1
-  X                  -> Boton 2
-  Y                  -> Boton 3
-  LB                 -> Boton 4
-  RB                 -> Boton 5
-  Cruceta            -> Hat 0  (algunos modelos la reportan como ejes 6 y 7)
-"""
 
 import math
 import pygame
@@ -50,7 +32,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Brazo Robotico - Pygame")
 
 clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 28)
+font = pygame.font.SysFont(None, 30)
 
 joystick       = None
 joystick_name  = "Sin control"
@@ -268,35 +250,40 @@ while running:
         box_pos[0] = int(end[0])
         box_pos[1] = int(end[1])
 
-    # ---- Dibujo ---------------------------------------------------------
+    # ---- Dibujo (mismo orden que interfaz.py) ---------------------------
 
-    # Target (zona objetivo)
-    pygame.draw.rect(screen, (0, 255, 0), target_rect, 2)
-
-    # Brazo — todos los segmentos en azul, sin resaltar seleccionado
+    # Brazo
     for i in range(len(points) - 1):
-        pygame.draw.line(screen, (0, 150, 255),
-                         (int(points[i][0]),   int(points[i][1])),
-                         (int(points[i+1][0]), int(points[i+1][1])), 5)
-        pygame.draw.circle(screen, (255, 0, 0),
-                           (int(points[i][0]), int(points[i][1])), 6)
+        pygame.draw.line(
+            screen,
+            (0, 150, 255),
+            (int(points[i][0]), int(points[i][1])),
+            (int(points[i + 1][0]), int(points[i + 1][1])),
+            5,
+        )
+        pygame.draw.circle(screen, (255, 0, 0), (int(points[i][0]), int(points[i][1])), 6)
 
-    # Efector final
+    # Pinza
     pygame.draw.circle(screen, (255, 255, 0), (int(end[0]), int(end[1])), 8)
 
     # Caja
-    pygame.draw.rect(screen, (255, 165, 0),
-                     (box_pos[0] - box_size // 2,
-                      box_pos[1] - box_size // 2,
-                      box_size, box_size))
+    pygame.draw.rect(
+        screen,
+        (255, 165, 0),
+        (box_pos[0] - box_size // 2, box_pos[1] - box_size // 2, box_size, box_size),
+    )
 
-    # Mensaje exito
-    if target_rect.collidepoint(box_pos[0], box_pos[1]):
-        msg = font.render("Caja colocada exitosamente", True, (0, 255, 0))
-        screen.blit(msg, (250, 50))
+    # Zona objetivo
+    pygame.draw.rect(screen, (0, 255, 0), target_rect, 2)
 
-    # HUD — solo eslabón seleccionado, igual al original
-    screen.blit(font.render(f"Eslabon seleccionado: {selected + 1}", True, (255, 255, 255)), (10, 10))
+    # Verificar éxito
+    if target_rect.collidepoint(box_pos):
+        text = font.render("Caja colocada exitosamente", True, (0, 255, 0))
+        screen.blit(text, (250, 50))
+
+    # Mostrar eslabón seleccionado
+    text2 = font.render(f"Eslabon seleccionado: {selected + 1}", True, (255, 255, 255))
+    screen.blit(text2, (10, 10))
 
     pygame.display.flip()
     clock.tick(60)

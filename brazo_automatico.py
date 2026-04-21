@@ -160,21 +160,34 @@ while running:
         box_pos[0], box_pos[1] = end[0], end[1]
 
     # =========================
-    # Dibujo
+    # Dibujo (mismo orden que interfaz.py)
     # =========================
-    pygame.draw.rect(screen, (0, 255, 0), target_rect, 2)
-
+    # Brazo
     for i in range(len(points) - 1):
-        pygame.draw.line(screen, (0, 150, 255), points[i], points[i+1], 5)
-        pygame.draw.circle(screen, (255, 0, 0),
-                           (int(points[i][0]), int(points[i][1])), 6)
+        pygame.draw.line(screen, (0, 150, 255), points[i], points[i + 1], 5)
+        pygame.draw.circle(screen, (255, 0, 0), (int(points[i][0]), int(points[i][1])), 6)
 
+    # Pinza
     pygame.draw.circle(screen, (255, 255, 0), (int(end[0]), int(end[1])), 8)
 
-    pygame.draw.rect(screen, (255, 165, 0),
-                     (int(box_pos[0]) - box_size//2,
-                      int(box_pos[1]) - box_size//2,
-                      box_size, box_size))
+    # Caja
+    pygame.draw.rect(
+        screen,
+        (255, 165, 0),
+        (box_pos[0] - box_size // 2, box_pos[1] - box_size // 2, box_size, box_size),
+    )
+
+    # Zona objetivo
+    pygame.draw.rect(screen, (0, 255, 0), target_rect, 2)
+
+    # Verificar éxito
+    if target_rect.collidepoint(box_pos):
+        text = font.render("Caja colocada exitosamente", True, (0, 255, 0))
+        screen.blit(text, (250, 50))
+
+    # Mostrar eslabón seleccionado
+    text2 = font.render(f"Eslabon seleccionado: {selected + 1}", True, (255, 255, 255))
+    screen.blit(text2, (10, 10))
 
     pygame.display.flip()
     clock.tick(60)
