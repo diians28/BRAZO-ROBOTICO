@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 import pygame
 import math
 
@@ -13,10 +13,10 @@ clock = pygame.time.Clock()
 # =========================
 # Parámetros
 # =========================
-base = (400, 300)
-lengths = [100, 80, 60, 40]
-angles = [0, 0, 0, 0]
-selected = 0
+Base = (400, 300)
+Longitudes = [100, 80, 60, 40]
+Angulos = [0, 0, 0, 0]
+Seleccionado = 0
 
 # Caja
 box_pos = [550, 250]
@@ -32,19 +32,17 @@ font = pygame.font.SysFont(None, 30)
 # Cinemática directa
 # =========================
 def forward_kinematics():
-    x, y = base
+    x, y = Base
     total_angle = 0
-    points = [base]
+    points = [Base]
     for i in range(4):
-        total_angle += angles[i]
-        x += lengths[i] * math.cos(total_angle)
-        y += lengths[i] * math.sin(total_angle)
+        total_angle += Angulos[i]
+        x += Longitudes[i] * math.cos(total_angle)
+        y += Longitudes[i] * math.sin(total_angle)
         points.append((x, y))
     return points
 
-# =========================
-# CCD — UN SOLO PASO POR FRAME
-# =========================
+
 def ik_single_step(target):
     best_i   = 0
     best_diff = 0.0
@@ -68,7 +66,7 @@ def ik_single_step(target):
 
     MAX_STEP = 0.03
     step = max(-MAX_STEP, min(MAX_STEP, best_diff * 0.4))
-    angles[best_i] += step
+    Angulos [best_i] += step
 
 # =========================
 # Rutina automática
@@ -100,13 +98,13 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                selected = (selected - 1) % 4
+                Seleccionado = (Seleccionado - 1) % 4
             elif event.key == pygame.K_RIGHT:
-                selected = (selected + 1) % 4
+                Seleccionado = (Seleccionado + 1) % 4
             elif event.key == pygame.K_UP:
-                angles[selected] += 0.1
+                Angulos[Seleccionado] += 0.1
             elif event.key == pygame.K_DOWN:
-                angles[selected] -= 0.1
+                Angulos[Seleccionado] -= 0.1
             elif event.key == pygame.K_g:
                 points = forward_kinematics()
                 end = points[-1]
@@ -186,7 +184,7 @@ while running:
         screen.blit(text, (250, 50))
 
     # Mostrar eslabón seleccionado
-    text2 = font.render(f"Eslabon seleccionado: {selected + 1}", True, (255, 255, 255))
+    text2 = font.render(f"Eslabon seleccionado: {Seleccionado + 1}", True, (255, 255, 255))
     screen.blit(text2, (10, 10))
 
     pygame.display.flip()
